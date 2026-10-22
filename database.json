@@ -1,0 +1,28 @@
+{
+  "contacts": [
+    {
+      "id": "1781415613508",
+      "name": "Ray Obiero",
+      "email": "rayobiero62@gmail.com",
+      "phone": "0745757639",
+      "message": "SErvice",
+      "createdAt": "2026-06-14T05:40:13.508Z"
+    },
+    {
+      "id": "1781415800448",
+      "name": "Ray Obiero",
+      "email": "rayobiero62@gmail.com",
+      "phone": "+254745757639",
+      "message": "mm",
+      "createdAt": "2026-06-14T05:43:20.448Z"
+    },
+    {
+      "id": "1781417497634",
+      "name": "Test",
+      "email": "test@test.com",
+      "phone": "123",
+      "message": "Hello internally",
+      "createdAt": "2026-06-14T06:11:37.634Z"
+    }
+  ]
+}
