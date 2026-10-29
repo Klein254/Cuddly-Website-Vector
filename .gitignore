@@ -6,3 +6,6 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# Contact-form submissions contain personal data — never commit
+database.json
