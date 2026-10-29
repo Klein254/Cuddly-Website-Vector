@@ -1,167 +1,217 @@
-import React from 'react';
-import { motion } from 'motion/react';
-import { 
+import React, { useState } from 'react';
+import { AnimatePresence, motion } from 'motion/react';
+import {
   Wind, ThermometerSun, Zap, Activity, Grid, Beaker,
-  ShieldAlert, Droplet, Stethoscope, HardHat, Package, Wrench, ArrowRight
+  ShieldAlert, Droplet, Stethoscope, HardHat, Package, Wrench, ArrowRight, ClipboardCheck, LucideIcon,
 } from 'lucide-react';
 import { PageView } from '../App';
+import { PageLink } from '../lib/router';
+import PageHeader from '../components/PageHeader';
+import SpotlightCard from '../components/fx/SpotlightCard';
+import SystemsStack from '../components/SystemsStack';
 
 interface ServicesProps {
   navigateTo?: (page: PageView) => void;
 }
 
+type Category = 'Engineering' | 'Maintenance' | 'Supplies';
+
+const servicesList: { title: string; description: string; icon: LucideIcon; category: Category }[] = [
+  {
+    title: 'Medical Gas Systems',
+    description: 'We provide a fast, reliable and efficient service for medical gas plumbing and gas fitting, including installation, repair and maintenance of gas lines and gas appliances. Our gas fitters handle the full range of medical gas appliance and pipework jobs.',
+    icon: Wind,
+    category: 'Engineering',
+  },
+  {
+    title: 'Industrial Tanks & Filtration',
+    description: 'Serving the fuel, beverage and dairy industries, Vector cleans diverse tanks (plastic, fibreglass, aluminium, stainless steel, concrete). We revive neglected tanks, handling plumbing, cleaning and disinfection for safe reuse, assess and repair worn or damaged tanks, and supply and install new, larger tanks as your storage needs grow.',
+    icon: Beaker,
+    category: 'Maintenance',
+  },
+  {
+    title: 'Hydro-jet Drain Cleaning',
+    description: 'Hydro-jetting clears drains with high-pressure water instead of chemicals, so nothing harsh ends up in the environment or eats away at your pipes. It is one of the most thorough ways to clear stubborn blockages and build-up.',
+    icon: Droplet,
+    category: 'Maintenance',
+  },
+  {
+    title: 'Steam Supply & Sterilisation',
+    description: 'We install, calibrate and maintain steam supply accessories and heating systems used for sterilisation, space heating and hot water in hospital facilities. Our technicians focus on performance, energy efficiency and safety, helping to reduce downtime.',
+    icon: ThermometerSun,
+    category: 'Engineering',
+  },
+  {
+    title: 'HVAC Systems',
+    description: 'HVAC services for the environmental needs of healthcare settings, including cleanrooms, operating theatres and patient wards: from system design and installation to routine preventive maintenance and emergency repairs, covering ventilation, air quality, humidity and temperature control.',
+    icon: Wind,
+    category: 'Engineering',
+  },
+  {
+    title: 'Emergency Power & UPS',
+    description: 'Power continuity matters in hospitals. We maintain and service generators, uninterruptible power supply (UPS) systems and related power infrastructure to keep critical loads running during outages and voltage fluctuations, with regular testing and load assessments.',
+    icon: Zap,
+    category: 'Engineering',
+  },
+  {
+    title: 'Medical & Technical Equipment Maintenance',
+    description: 'Preventive and corrective maintenance of medical and technical equipment, following manufacturer specifications: scheduled servicing, parts replacement, calibration and performance testing. Our focus areas are dialysis, ICU, theatre and radiology equipment.',
+    icon: Activity,
+    category: 'Maintenance',
+  },
+  {
+    title: 'Hardware & Electrical Supplies',
+    description: 'A wide range of tools, wiring accessories, lighting, circuit protection devices, power tools and general hardware, supplying construction, maintenance and technical operations.',
+    icon: HardHat,
+    category: 'Supplies',
+  },
+  {
+    title: 'Commercial Kitchens & Laundry',
+    description: 'We supply, install and maintain laundry and kitchen equipment for commercial, industrial and institutional use: washing machines, dryers, steam irons, dishwashers, ovens, cookers, refrigerators and food service appliances, backed by preventive maintenance and repairs.',
+    icon: Package,
+    category: 'Supplies',
+  },
+  {
+    title: 'Stainless Steel Fabrication',
+    description: 'Durable, made-to-measure stainless steel for kitchens, hospitals, laboratories and commercial facilities: tables, sinks, worktops, trolleys, cabinets, rails and specialised fittings, designed with hygiene and safety in mind.',
+    icon: Grid,
+    category: 'Supplies',
+  },
+  {
+    title: 'Surgical Equipment & Consumables',
+    description: 'We supply and maintain surgical equipment and medical consumables, covering surgical instruments, sterilisation units, diagnostic tools and clinical devices, supported by scheduled maintenance and repairs.',
+    icon: Stethoscope,
+    category: 'Supplies',
+  },
+  {
+    title: 'Industrial Incinerators',
+    description: 'We supply, install and maintain incinerators for medical, industrial and municipal waste, selected with applicable environmental requirements in mind. We also provide routine servicing, repairs and operator training.',
+    icon: ShieldAlert,
+    category: 'Engineering',
+  },
+  {
+    title: 'Facility Management Consulting',
+    description: 'Site audits, energy assessments and lifecycle reviews that lead to a maintenance plan built around your facility, aimed at reducing downtime and long-term running costs.',
+    icon: ClipboardCheck,
+    category: 'Maintenance',
+  },
+  {
+    title: 'General Maintenance & Repair',
+    description: 'Routine building upkeep covering masonry, painting, minor civil works and carpentry, preserving the value and safety of your commercial or residential property.',
+    icon: Wrench,
+    category: 'Maintenance',
+  },
+  {
+    title: 'Electrical Installations & Safety',
+    description: 'Electrical installations, switchgear maintenance and energy audits, helping your power distribution run safely and efficiently.',
+    icon: Zap,
+    category: 'Engineering',
+  },
+  {
+    title: 'Commercial Plumbing Systems',
+    description: 'Water supply networks, pump stations and waste systems: leak detection, pipe retrofitting and emergency repairs to keep water flowing and prevent costly water damage.',
+    icon: Droplet,
+    category: 'Engineering',
+  },
+];
+
+export const serviceNames = servicesList.map((s) => s.title);
+
+const filters: ('All' | Category)[] = ['All', 'Engineering', 'Maintenance', 'Supplies'];
+
 export default function Services({ navigateTo }: ServicesProps) {
-  const servicesList = [
-    {
-      title: "Medical Gas Systems",
-      description: "We provide a fast, reliable and efficient service for all medical gas plumbing and gas fitting; that includes installation, repair and maintenance of gas lines and gas appliances. For any medical gas fitting work, you can trust our expertise. Our fully qualified, gasfitters will be able to do anything you need with medical gas appliances and gas piping.",
-      icon: <Wind size={24} />
-    },
-    {
-      title: "Industrial Tanks & Filtration",
-      description: "Serving the Fuel, Beverage and Dairy industries, Vector cleans diverse tanks (plastic, fiberglass, aluminum, stainless steel, concrete). We revive neglected tanks, handling plumbing, cleaning and disinfection for safe reuse. Our focus: ensuring your tanks are clean, functional and well-maintained through scheduled services. We assess and repair worn or damaged tanks, extending their lifespan, and also supply and install new, larger tanks to meet your evolving storage needs.",
-      icon: <Beaker size={24} />
-    },
-    {
-      title: "Hydro-jet Drain Cleaning",
-      description: "Hydro-jetting is one of the safest and most effective ways to clean the drain. The benefits of hydro jet cleaning is that it's environmentally friendly. No chemicals are used that might end up in the environment or, worse, damage your pipes.",
-      icon: <Droplet size={24} />
-    },
-    {
-      title: "Steam Supply & Sterilization",
-      description: "We provide comprehensive services for the installation, calibration, and maintenance of steam supply accessories and heating systems. These systems are vital for sterilization, space heating, and hot water supply in hospital facilities. Our technicians ensure optimal performance, energy efficiency, and safety compliance, minimizing downtime and maximizing reliability.",
-      icon: <ThermometerSun size={24} />
-    },
-    {
-      title: "HVAC Systems",
-      description: "Our HVAC services are designed to support the unique environmental needs of healthcare settings, including cleanrooms, operating theaters, and patient wards. We offer full-spectrum solutions—from system design and installation to routine preventive maintenance and emergency repairs—ensuring proper ventilation, air quality, humidity control, and temperature regulation to meet health standards.",
-      icon: <Wind size={24} />
-    },
-    {
-      title: "Emergency Power & UPS",
-      description: "Power continuity is non-negotiable in hospitals. We maintain and service generators, Uninterruptible Power Supply (UPS) systems, and related power infrastructure to guarantee seamless operation during outages or voltage fluctuations. Regular testing, load assessments, and compliance checks are part of our service to ensure 24/7 power availability.",
-      icon: <Zap size={24} />
-    },
-    {
-      title: "Proper Maintenance of Equipment",
-      description: "We perform detailed preventive and corrective maintenance on all medical and technical equipment strictly according to manufacturer specifications and catalogues. This includes scheduled servicing, parts replacement, calibration, and performance testing ensuring equipment reliability, extended lifespan, and regulatory compliance. Our strength lies in Dialysis, ICU, Theater and Radiology Equipment.",
-      icon: <Activity size={24} />
-    },
-    {
-      title: "Hardware and Electrical Supplies",
-      description: "We provide comprehensive hardware and electrical equipment supply services, offering a wide range of tools, wiring accessories, lighting solutions, circuit protection devices, power tools, and general hardware items. Our products support construction, maintenance, and technical operations, ensuring high quality, reliability, and timely delivery.",
-      icon: <HardHat size={24} />
-    },
-    {
-      title: "Commercial Kitchens & Laundry",
-      description: "We supply, install, and maintain a full range of laundry and kitchen equipment tailored for commercial, industrial, and institutional use. Our services cover washing machines, dryers, steam irons, dishwashers, ovens, cookers, refrigerators, and food service appliances. We ensure reliable performance through preventive maintenance, repairs, and fast response support.",
-      icon: <Package size={24} />
-    },
-    {
-      title: "Stainless Steel Fabrication",
-      description: "We offer high-quality stainless steel fabrication services, producing durable and customized solutions for kitchens, hospitals, laboratories, and commercial facilities. Our fabrication work includes tables, sinks, worktops, trolleys, cabinets, rails, and specialized structural fittings, all designed to meet hygiene, safety, and operational standards.",
-      icon: <Grid size={24} />
-    },
-    {
-      title: "Surgical Equipment & Consumables",
-      description: "We supply and maintain a wide range of surgical equipment and medical consumables, ensuring accuracy, safety, and compliance with healthcare standards. Our services cover surgical instruments, sterilization units, diagnostic tools, and clinical devices, supported by scheduled maintenance, repairs, and timely service.",
-      icon: <Stethoscope size={24} />
-    },
-    {
-      title: "Industrial Incinerators",
-      description: "We supply, install, and maintain high-efficiency incinerators designed for medical, industrial, and municipal waste management. Our systems comply with environmental and regulatory requirements, offering safe and reliable waste disposal. We also provide routine servicing, repairs, and operator training for optimal performance.",
-      icon: <ShieldAlert size={24} />
-    },
-    {
-      title: "Facility Management Consulting",
-      description: "We offer expert consultation services to optimize your facility's operational footprint. Our experienced team conducts comprehensive site audits, energy assessments, and lifecycle analysis to develop customized maintenance strategies that minimize downtime and reduce long-term operational expenditures.",
-      icon: <Activity size={24} />
-    },
-    {
-      title: "General Maintenance & Repair",
-      description: "Our general maintenance division handles all aspects of routine building upkeep, ensuring structural integrity and aesthetic appeal. From masonry and professional painting to minor civil works and carpentry, we preserve the value and safety of your commercial or residential property.",
-      icon: <Wrench size={24} />
-    },
-    {
-      title: "Electrical Installations & Safety",
-      description: "We deliver complete electrical engineering solutions, including high-voltage installations, switchgear maintenance, and comprehensive energy audits. Our certified electricians ensure your power distribution networks operate safely, efficiently, and in strict compliance with all national electrical codes.",
-      icon: <Zap size={24} />
-    },
-    {
-      title: "Commercial Plumbing Systems",
-      description: "Our plumbing experts manage complex water supply networks, industrial pump stations, and waste management systems. We provide advanced leak detection, pipe retrofitting, and emergency repairs to guarantee seamless water flow and prevent costly water damage to your infrastructure.",
-      icon: <Droplet size={24} />
-    }
-  ];
+  const [filter, setFilter] = useState<'All' | Category>('All');
+  const visible = servicesList.filter((s) => filter === 'All' || s.category === filter);
 
   return (
     <div className="w-full bg-white pb-32">
-      {/* Header */}
-      <div className="bg-black text-white py-28 px-6 md:px-16 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-15 bg-[url('https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center filter grayscale contrast-125 select-none pointer-events-none"></div>
-        <div className="container mx-auto relative z-10 max-w-7xl text-left">
-          <span className="text-orange-500 font-sans text-xs font-bold uppercase tracking-widest block mb-3">WHAT WE DELIVER</span>
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-display font-bold tracking-tight uppercase mb-6">
-            TECHNICAL SERVICES.
-          </h1>
-          <p className="text-neutral-400 text-base md:text-lg leading-relaxed max-w-2xl font-sans">
-            End-to-end industrial engineering, clinical installations, and facility management at the highest safety compliance standards.
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        eyebrow="What we deliver"
+        title={['Technical', 'Services.']}
+        intro="Engineering, clinical installations, maintenance and supplies for healthcare, hospitality, residential and commercial facilities."
+        image="/images/welder.webp"
+        ghost="Services"
+      />
+
+      <SystemsStack />
 
       {/* Services Grid */}
-      <div className="container mx-auto px-6 md:px-16 mt-28 max-w-7xl">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {servicesList.map((service, index) => (
-            <motion.div 
-              key={index}
-              initial={{ opacity: 0, y: 15 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ delay: (index % 3) * 0.08, duration: 0.5 }}
-              className="bg-neutral-50/50 backdrop-blur-sm border border-neutral-100 p-8 hover:bg-white hover:shadow-xl hover:border-transparent transition-all duration-300 group flex flex-col justify-between h-full rounded-3xl"
-            >
-              <div>
-                <div className="w-14 h-14 bg-white border border-neutral-100 shadow-sm group-hover:bg-orange-500 group-hover:border-orange-500 group-hover:text-black flex items-center justify-center mb-6 transition-all duration-300 rounded-2xl">
-                  {React.cloneElement(service.icon, { size: 24, className: "text-black transition-colors" })}
-                </div>
-                <h3 className="text-xl font-display font-bold uppercase tracking-tight text-black mb-3 group-hover:text-orange-500 transition-colors duration-200">
-                  {service.title}
-                </h3>
-                <p className="text-neutral-500 font-sans text-sm leading-relaxed">
-                  {service.description}
-                </p>
-              </div>
-            </motion.div>
-          ))}
+      <div className="container mx-auto px-6 md:px-16 mt-12 max-w-7xl">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
+          <h2 className="text-3xl md:text-5xl font-display font-bold uppercase tracking-tight leading-[0.95]">
+            All services <span className="text-neutral-500 tabular-nums">({visible.length})</span>
+          </h2>
+          <div role="group" aria-label="Filter services" className="flex flex-wrap gap-2">
+            {filters.map((f) => (
+              <button
+                key={f}
+                type="button"
+                aria-pressed={filter === f}
+                onClick={() => setFilter(f)}
+                className={`relative px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider transition-colors ${
+                  filter === f ? 'text-white' : 'text-neutral-700 bg-neutral-100 hover:bg-neutral-200'
+                }`}
+              >
+                {filter === f && <motion.span layoutId="service-filter" className="absolute inset-0 bg-black rounded-full" transition={{ type: 'spring', stiffness: 400, damping: 34 }} />}
+                <span className="relative">{f}</span>
+              </button>
+            ))}
+          </div>
         </div>
-        
+
+        <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <AnimatePresence mode="popLayout">
+            {visible.map((service, index) => (
+              <SpotlightCard
+                layout
+                key={service.title}
+                initial={{ opacity: 0, y: 20, scale: 0.97 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ delay: (index % 3) * 0.05, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+                className="bg-neutral-50 border border-neutral-100 p-8 hover:bg-white hover:shadow-2xl hover:border-transparent transition-[background-color,box-shadow,border-color] duration-300 rounded-3xl"
+              >
+                <div className="flex items-start justify-between mb-6">
+                  <div className="w-14 h-14 bg-white border border-neutral-100 shadow-sm group-hover:bg-orange-500 group-hover:border-orange-500 group-hover:-rotate-6 flex items-center justify-center transition-all duration-300 rounded-2xl">
+                    <service.icon size={24} className="text-black" aria-hidden="true" />
+                  </div>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-neutral-600 bg-white border border-neutral-200 rounded-full px-3 py-1">
+                    {service.category}
+                  </span>
+                </div>
+                <h3 className="text-xl font-display font-bold uppercase tracking-tight text-black mb-3">{service.title}</h3>
+                <p className="text-neutral-600 font-sans text-sm leading-relaxed">{service.description}</p>
+              </SpotlightCard>
+            ))}
+          </AnimatePresence>
+        </motion.div>
+
         {/* Custom Sourcing Section */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="mt-20 border border-neutral-800 p-10 bg-black/95 backdrop-blur-xl text-white relative overflow-hidden rounded-3xl shadow-xl"
+          transition={{ duration: 0.7 }}
+          className="grain mt-20 border border-neutral-800 p-10 md:p-14 bg-black text-white relative overflow-hidden rounded-3xl shadow-xl"
         >
-          <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#ff6b00_1px,transparent_1px)] [background-size:16px_16px]"></div>
+          <div aria-hidden="true" className="absolute inset-0 opacity-10 bg-[radial-gradient(#ff6900_1px,transparent_1px)] [background-size:16px_16px]"></div>
+          <div aria-hidden="true" className="absolute -right-24 -top-24 w-96 h-96 bg-orange-500/25 blur-[100px] rounded-full" />
           <div className="relative z-10 max-w-4xl">
-            <span className="text-orange-500 font-sans text-xs font-bold uppercase tracking-widest block mb-2">BEYOND OUR CATALOG</span>
-            <h3 className="text-3xl font-display font-bold uppercase tracking-tight mb-4">Unlimited Procurement & Sourcing</h3>
-            <p className="text-neutral-400 font-sans text-base leading-relaxed mb-8">
-              If it belongs in a commercial, clinical, or residential facility, we can source it. Beyond our specialized engineering supplies, we maintain a vast network of manufacturers and distributors to procure general products—from plumbing fixtures like showers and faucets, to architectural hardware like door stoppers, hinges, and custom fittings. Whatever your project requires, we deliver it directly to your site.
+            <span className="text-orange-500 font-sans text-xs font-bold uppercase tracking-widest block mb-2">Beyond our catalogue</span>
+            <h2 className="text-3xl md:text-4xl font-display font-bold uppercase tracking-tight mb-4">Procurement & Sourcing</h2>
+            <p className="text-neutral-300 font-sans text-base leading-relaxed mb-8">
+              Need something that isn't listed? Beyond our specialised engineering supplies, we work with a network of manufacturers and distributors to source general products, from plumbing fixtures like showers and taps to architectural hardware like door stoppers, hinges and custom fittings, and deliver them to your site.
             </p>
-            <button 
-              onClick={() => navigateTo && navigateTo('contact')}
-              className="inline-flex items-center justify-center bg-orange-500 text-black px-8 py-4 font-sans font-bold uppercase tracking-wider text-xs hover:bg-white hover:text-black transition-all rounded-full shadow-lg group"
+            <PageLink
+              to="contact"
+              className="inline-flex items-center justify-center bg-orange-500 text-black px-8 py-4 font-sans font-bold uppercase tracking-wider text-xs hover:bg-white transition-all rounded-full shadow-lg group"
             >
-              Contact Procurement
-              <ArrowRight size={14} className="ml-2 group-hover:translate-x-1 transition-transform" />
-            </button>
+              Ask about sourcing
+              <ArrowRight size={14} className="ml-2 group-hover:translate-x-1 transition-transform" aria-hidden="true" />
+            </PageLink>
           </div>
         </motion.div>
       </div>
     </div>
   );
 }
-
